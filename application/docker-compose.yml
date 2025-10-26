@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: demo_redis
+    ports:
+      - "6379:6379"
+
+  auth:
+    build: ./auth-service
+    container_name: demo_auth
+    ports:
+      - "8001:8000"
+    depends_on:
+      - redis
+
+  posts:
+    build: ./posts-service
+    container_name: demo_posts
+    ports:
+      - "8002:8000"
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  frontend:
+    build: ./frontend
+    container_name: demo_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - posts
