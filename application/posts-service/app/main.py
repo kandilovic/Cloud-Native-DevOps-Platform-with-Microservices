@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 import os
 
@@ -11,7 +11,8 @@ redis_client = None
 if REDIS_HOST:
     try:
         import redis
-        redis_client = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
+        redis_client = redis.Redis(
+            host=REDIS_HOST, port=6379, db=0, decode_responses=True)
         redis_client.ping()
         use_redis = True
     except Exception:
@@ -20,13 +21,16 @@ if REDIS_HOST:
 _posts = []
 _id = 1
 
+
 class PostIn(BaseModel):
     title: str
     body: str
 
+
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "posts", "redis_connected": use_redis}
+
 
 @app.post("/posts")
 def create_post(p: PostIn):
@@ -38,6 +42,7 @@ def create_post(p: PostIn):
     else:
         _posts.append(post)
     return post
+
 
 @app.get("/posts")
 def list_posts():

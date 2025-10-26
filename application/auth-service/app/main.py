@@ -5,13 +5,16 @@ app = FastAPI(title="Auth Service")
 
 users_db = {}  # simple in-memory dict
 
+
 class User(BaseModel):
     username: str
     password: str
 
+
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "auth"}
+
 
 @app.post("/register")
 def register(user: User):
@@ -19,6 +22,7 @@ def register(user: User):
         raise HTTPException(status_code=400, detail="User already exists")
     users_db[user.username] = user.password
     return {"message": f"User {user.username} registered"}
+
 
 @app.post("/login")
 def login(user: User):
