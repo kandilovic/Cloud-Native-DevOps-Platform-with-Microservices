@@ -1,17 +1,17 @@
-name: Local CI Pipeline
+name: Milestone 2 - Local Tests & CI Lint
 
 on:
   push:
-    branches: [ "main", "dev", "test" ]
+    branches: ["main", "dev", "test"]
   pull_request:
 
 jobs:
-  build-test:
+  # Step 1: Run unit tests & lint
+  test-and-lint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [auth-service, posts-service]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,14 +33,19 @@ jobs:
       - name: Run tests
         run: pytest -v application/${{ matrix.service }}/tests
 
+  # Step 2: Build Docker images
   docker-build:
     runs-on: ubuntu-latest
-    needs: build-test
-
+    needs: test-and-lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build all Docker images
-        run: |
-          docker-compose -f application/docker-compose.yml build
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install docker-compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
+
+      - name: Build Docker images
+        run: docker-compose -f application/docker-compose.yml build
